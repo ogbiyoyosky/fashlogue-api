@@ -51,6 +51,9 @@ export default class UserController {
         postImage,
         postDescription,
         postTitle,
+        likes,
+        views,
+        comments,
         Tags,
         postedTo
     } = req.body;
@@ -63,6 +66,9 @@ export default class UserController {
             postImage,
             postDescription,
             postTitle,
+            likes,
+            views,
+            comments,
             Tags,
             postedTo  
         })

@@ -41,6 +41,18 @@ export let PostSchema : Schema = new Schema({
     type: Array,
     default: ['fashlogue']
   },
+  comments: {
+    type: Array,
+    default: []
+  },
+  likes: {
+    type: Number,
+    default: 0
+  },
+  views: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: new Date

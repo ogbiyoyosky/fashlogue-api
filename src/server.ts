@@ -1,6 +1,7 @@
 import * as http from 'http';
 import Express from './config/express';
 const port = normalizePort(process.env.PORT) || 3000;
+const SocketIO = require('socket.io');
 
 // set server's port
 Express.set('port', port);
@@ -35,6 +36,36 @@ function onError (err: NodeJS.ErrnoException):void {
             throw err;
     }
 }
+
+// Initialize Socket Server over the same port
+const io = new SocketIO(server);
+
+// Setup auth middleware for sockets server
+io.use(async (socket, next) => {
+  try {
+    if (socket.handshake.query && socket.handshake.query.token) {
+
+      next();
+    } else {
+      next(new Error('Authentication error'));
+    }
+  } catch (err) {
+    next(new Error('Authentication error'));
+  }
+});
+
+io.on('connection', (socket) => {
+  // Connection is authenticated.
+  // Notify the client that the connection is established.
+    console.log('client connected')
+  io.to(socket.id).emit('message', 'sucessfully connected to server.');
+});
+
+let app = Express;
+// Save a reference of the socket instance for later use
+// USE: req.app.get('socketio');
+app.set('socketio', io);
+
 
 /**
  * Normalize port
