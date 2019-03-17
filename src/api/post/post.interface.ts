@@ -7,8 +7,15 @@ export interface IPost extends mongoose.Document {
     category: String;
     postImage: String;
     comments: [String];
-    likes: Number;
-    views: Number;
+    likesCount: Number;
+    viewsCount: Number,
+    likes: [
+        {
+            likedBy: String,
+            likedAt: Date
+        }
+    ];
+    views: [String];
     tags: [String];
     postedTo: [String];
     createdAt: Date;

@@ -112,7 +112,11 @@ export class PostRouter {
      */
     this
     .router
-    .get('/:_id', PostController.getPost)
+    .get('/:_id', PostController.getPost);
+
+    this
+        .router
+        .post('/:_id/act', PostController.updateLikes);
 
    }
 }

@@ -9,8 +9,7 @@ Express.set('port', port);
 //initiate an instance of the server
 const server = http.createServer(Express);
 // server listen on port
-server.listen(port);
-server.on('listen', onListening);
+server.listen(port, onListening);
 server.on('error', onError);
 
 function onListening ():void {
@@ -18,6 +17,7 @@ function onListening ():void {
     let bind = (typeof addr === "string") ? `pipe ${addr}` : `port ${addr.port}`
     console.info(`Listening on ${bind}`);
 }
+ 
 //error handling
 function onError (err: NodeJS.ErrnoException):void {
     if (err.syscall !== "listen") throw err;
@@ -36,30 +36,27 @@ function onError (err: NodeJS.ErrnoException):void {
             throw err;
     }
 }
+/**
+ * Socket logic
+ */
 
-// Initialize Socket Server over the same port
-const io = new SocketIO(server);
+ // Initialize Socket Server over the same port
+const io = SocketIO(server);
 
-// Setup auth middleware for sockets server
-io.use(async (socket, next) => {
-  try {
-    if (socket.handshake.query && socket.handshake.query.token) {
+const connections = [];
+io.on('connection', (socket)=> {
+  console.log('connected to socket' + socket.id);
+  connections.push(socket);
+  socket.on('disconnect', ()=>{
+    console.log('Disconnected - ' + socket.id);
+  })
 
-      next();
-    } else {
-      next(new Error('Authentication error'));
-    }
-  } catch (err) {
-    next(new Error('Authentication error'));
-  }
-});
+})
 
-io.on('connection', (socket) => {
-  // Connection is authenticated.
-  // Notify the client that the connection is established.
-    console.log('client connected')
-  io.to(socket.id).emit('message', 'sucessfully connected to server.');
-});
+
+
+
+
 
 let app = Express;
 // Save a reference of the socket instance for later use

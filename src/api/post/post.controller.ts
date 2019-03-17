@@ -2,6 +2,7 @@ import {Request, Response, NextFunction} from 'express';
 import PostModel from './post.model';
 import * as httpStatus from 'http-status';
 
+
 export default class UserController {
 
   /**
@@ -164,9 +165,8 @@ public static async getPost(req : Request, res : Response, next : NextFunction) 
 }
 
   public static async updatePost(req : Request, res : Response, next : NextFunction) {
-
+    
     try {
-
       //
       // Get data
       var options = {
@@ -178,6 +178,7 @@ public static async getPost(req : Request, res : Response, next : NextFunction) 
       };
 
       const _id : String = req.params._id;
+      
       let result = await PostModel.findOneAndUpdate({
         _id
       }, {
@@ -187,7 +188,7 @@ public static async getPost(req : Request, res : Response, next : NextFunction) 
 
       const status = res.statusCode;
 
-      //
+      
       // Response
       return res.send({message: 'Sucessfully updated a post', result: result, status: status});
     } catch (err) {
@@ -196,6 +197,57 @@ public static async getPost(req : Request, res : Response, next : NextFunction) 
       // Error response
       res.send({message: 'Could not update the post', err: err});
     }
+  }
+
+  public static async updateLikes(req : Request, res : Response, next : NextFunction) {
+
+    try {
+
+    const {action, username} = req.body;
+
+    const counter = action === 'like' ? 1 : -1
+      
+    if(action === 'like') {
+      const result = await PostModel.update({_id: req.params._id},{
+        $inc: {
+          likesCount: counter
+        },
+        $push: {
+          likes: {
+             likedBy: username, likedAt: new Date() 
+          }
+        }
+      }).exec()
+  
+      const status = res.statusCode;
+        
+        // Response
+        return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
+  
+    } else if(action === 'unlike') {
+      const result = await PostModel.update({_id: req.params._id}, {
+        
+        $inc: {
+          likesCount: counter
+        },
+        $pull: {
+          likes: {
+             likedBy: username
+          }
+        }
+      })
+
+      const status = res.statusCode;
+        
+        // Response
+        return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
+    }
+    
+    }catch(err){
+
+    }
+    
+
   }
 
 }

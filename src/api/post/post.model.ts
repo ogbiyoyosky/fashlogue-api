@@ -45,13 +45,19 @@ export let PostSchema : Schema = new Schema({
     type: Array,
     default: []
   },
-  likes: {
+  likesCount: {
     type: Number,
     default: 0
   },
-  views: {
+  viewsCount: {
     type: Number,
     default: 0
+  },
+  likes: {
+    type:Array,
+  },
+  views: {
+    type: Array,
   },
   createdAt: {
     type: Date,
