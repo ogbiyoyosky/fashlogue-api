@@ -199,55 +199,112 @@ public static async getPost(req : Request, res : Response, next : NextFunction) 
     }
   }
 
+  /**
+   * @ method updateLike - Method to update likes on a post. 
+   * @param req 
+   * @param res 
+   * @param next 
+   * @return Object result - responses from the server. 
+   */
   public static async updateLikes(req : Request, res : Response, next : NextFunction) {
-
     try {
-
-    const {action, username} = req.body;
-
-    const counter = action === 'like' ? 1 : -1
-      
+    //get request from body
+    let action = req.body.action;
+    let counter 
+    const {username} = req.body;
+    //set counter to 1 or -1 if action passed is like or unlike respectively. 
+    const _id : String = req.params._id;
+    //save status code.   
+    const status = res.statusCode;
+    // handle like action from the req.body
     if(action === 'like') {
-      const result = await PostModel.update({_id: req.params._id},{
-        $inc: {
-          likesCount: counter
-        },
-        $push: {
-          likes: {
-             likedBy: username, likedAt: new Date() 
-          }
-        }
-      }).exec()
+        //check if the user has liked the post
+        await PostModel.find({_id, 'likes.likedBy': username})
+      .then(
+        //get the responses
+        async response=> {
+          //if there were likes
+          if (response.length !== 0 ){
+            // check if the specific user has liked it
+            response[0].likes.filter( async (userlike)=> {
+              let likeExist =  userlike.likedBy === username; 
+                if(likeExist ) {
+                   // send a message that like exist
+                  return res.send({message: "you already liked the post", status: status});
   
-      const status = res.statusCode;
-        
-        // Response
-        return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
-  
-    } else if(action === 'unlike') {
-      const result = await PostModel.update({_id: req.params._id}, {
-        
-        $inc: {
-          likesCount: counter
-        },
-        $pull: {
-          likes: {
-             likedBy: username
+                } else {
+                   // //update collection using the id from params
+                      counter = 1;
+                      action = "like"
+                     const result = await  PostModel.update({_id: req.params._id},{
+                     $inc: {
+                         likesCount: counter
+                       },
+                     $push: {
+                         likes: {
+                            likedBy: username, likedAt: new Date() 
+                         } 
+                        }
+                    }).exec();
+                    
+                    return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
+                }
+            });  
+          }else {
+              // if user has never liked the post
+              // //update collection using the id from params
+              action = "like";
+              counter = 1;
+              const result = await  PostModel.update({_id: req.params._id},{
+                $inc: {
+                    likesCount: counter
+                  },
+                $push: {
+                    likes: {
+                      likedBy: username, likedAt: new Date() 
+                    }
+                  }
+              }).exec();
+              // return result
+              return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
           }
-        }
-      })
+        })
 
-      const status = res.statusCode;
+      } else if(action === 'unlike') {
+        //check if the user has liked the post
+        await PostModel.find({_id, 'likes.likedBy': username})
+        // get the responses and check the likes
+        .then( async response => {
+          if (response.length !== 0){
+            response[0].likes.filter(async (userLike) => {
+              let likeExist =  userLike.likedBy === username;
+              // remove like if the like exist
+              if(likeExist) {
+                let action = 'unlike';
+                let counter = -1;
+              const result = await PostModel.update({_id: req.params._id}, {
+                $inc: {
+                  likesCount: counter
+                },
+                $pull: {
+                  likes: {
+                      likedBy: username
+                  }
+                }
+                }).exec()
+
+                return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
+              } 
+            }) 
+          } else {
+            //send a message to the user.
+            return res.send({message: "You can unlike a post you haven't liked"});
+          }
+        })   
         
-        // Response
-        return res.send({message: `Sucessfully ${action} the post`, result: result, status: status});
-    }
-    
+      }
     }catch(err){
-
-    }
-    
-
+      return res.send({error: err })
+    } 
   }
-
 }
