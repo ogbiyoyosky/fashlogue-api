@@ -100,7 +100,7 @@ export class PostRouter {
             .router
             .put('/:_id', PostController.updatePost)
 
-        /**
+    /**
      * @api {Get} v1/users/:_id Get Post
      * @apiDescription update a particular post in the db
      * @apiVersion 1.0.0
@@ -113,7 +113,20 @@ export class PostRouter {
     this
     .router
     .get('/:_id', PostController.getPost);
-
+    
+    /**
+     * @api {Post} v1/users/:_id/act like and Unlike a post
+     * @apiDescription like and unlike a particular post
+     * @apiVersion 1.0.0
+     * @apiName updateLike
+     * @param {JSON} action - can be like or unlike
+     * @param {JSON} username - username of the person that wants to like or unlike the post.
+     * @apiGroup Post
+     * @apiPermission All
+     * @apiSuccess {Number}     status                       http status response
+     * @apiSuccess {Object}     result                        successfully Updated
+     * 
+     */
     this
         .router
         .post('/:_id/act', PostController.updateLikes);
