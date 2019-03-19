@@ -17,7 +17,8 @@
     "test": "cross-env NODE_ENV=test nyc --reporter=html ts-mocha --timeout 20000  -p  src/tsconfig.json --recursive src/**/*.test.ts",
     "test:integration": "cross-env NODE_ENV=test  ts-mocha --timeout 20000  -p  src/tsconfig.json src/test/integration/*.test.ts --exit",
     "coverage": "nyc npm run test:integration",
-    "watch-ts": "tsc-watch -w -p src --onSuccess \"npm run start-dev\""
+    "watch-ts": "tsc-watch  --outDir ./dist --onSuccess \"npm run serve\" --lib ES2015 --skipLibCheck"
+    
   },
   "nyc": {
     "extension": [
